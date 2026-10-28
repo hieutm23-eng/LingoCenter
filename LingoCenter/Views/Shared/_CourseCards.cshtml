@@ -1,0 +1,21 @@
+﻿@model IEnumerable<Course>
+<div class="grid">
+@foreach(var c in Model){<article class="course-card">
+<div class="course-art">
+<strong>@(c.Level==CourseLevel.IELTS?"IELTS":c.Level==CourseLevel.TOEIC?"TOEIC":"Aa")</strong>
+<span>@c.Level</span>
+</div>
+<div class="course-body">
+<small>@c.DurationWeeks TUẦN · HỌC TẠI TRUNG TÂM</small>
+<h2 style="margin-top:8px">@c.Name</h2>
+<p>@c.Description</p>
+<div class="course-bottom">
+<strong>@c.TuitionFee.ToString("N0") ₫</strong>
+<a href="@Url.Action("Course","Home",new{id=c.Id})">Xem lớp học →</a>
+</div>
+</div>
+</article>}
+</div>
+
+@if(!Model.Any()){<div class="panel empty">
+<strong>Chưa tìm thấy khóa học</strong>Thử từ khóa hoặc trình độ khác.</div>}

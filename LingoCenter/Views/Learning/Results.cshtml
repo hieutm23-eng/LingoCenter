@@ -1,0 +1,54 @@
+﻿@model List<Enrollment>
+@{ViewBag.Title = "Kết quả học tập"; var attendance = (List<Attendance>)ViewBag.Attendance;}
+<div class="heading">
+    <div>
+        <div class="eyebrow">YOUR PROGRESS</div>
+        <h1>Mỗi nỗ lực đều được ghi nhận</h1>
+        <p>Tổng kết = 40% giữa kỳ + 60% cuối kỳ. Đạt từ 5.0/10.</p>
+    </div>
+</div>
+<div class="panel table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Lớp học</th>
+                <th>Giữa kỳ</th>
+                <th>Cuối kỳ</th>
+                <th>Tổng kết</th>
+                <th>Kết quả</th>
+                <th>Chuyên cần</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var e in Model)
+            {
+                var ats = attendance.Where(a => a.EnrollmentId == e.Id).ToList(); var attended = ats.Count(a => a.Status == AttendanceStatus.Present || a.Status == AttendanceStatus.Late);
+                <tr>
+                    <td>
+                        <strong>@e.CenterClass.Code</strong>
+                        <small>@e.CenterClass.Course.Name</small>
+                    </td>
+                    <td>@(e.ScoresPublished?e.Midterm.ToString():"Chưa công bố")</td>
+                    <td>@(e.ScoresPublished?e.Final.ToString():"—")</td>
+                    <td>
+                        <span class="score">@(e.ScoresPublished&&e.Result.HasValue?e.Result.Value.ToString("0.00"):"—")</span>
+                    </td>
+                    <td>@(e.ScoresPublished&&e.Result.HasValue?(e.Result>=5?"Đạt":"Chưa đạt"):"Đang cập nhật")</td>
+                    <td>
+                        @attended / @ats.Count buổi đã ghi nhận<small>Đi muộn được tính có mặt</small>
+                        <details>
+                            <summary>Chi tiết điểm danh</summary>
+                            @foreach (var a in ats.OrderBy(a => a.ClassSession.StartsAt))
+                            {<div>
+                                    @a.ClassSession.StartsAt.ToString("dd/MM/yyyy"): <span class="badge @a.Status">@a.Status</span>
+                                </div>}
+                        </details>
+                    </td>
+                </tr>
+}
+        </tbody>
+    </table>
+    @if (!Model.Any())
+    {<p class="empty">Bạn chưa có kết quả học tập.</p>}
+</div>
+@Html.Partial("_Pager")

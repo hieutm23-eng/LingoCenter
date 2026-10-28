@@ -1,0 +1,34 @@
+﻿@model TimetableVm
+@{ViewBag.Title="Thời khóa biểu";string[] days={"Thứ hai","Thứ ba","Thứ tư","Thứ năm","Thứ sáu","Thứ bảy","Chủ nhật"};}
+<div class="heading">
+<div>
+<div class="eyebrow">YOUR WEEK AT A GLANCE</div>
+<h1>Lịch tuần của bạn</h1>
+<p>@Model.Week.ToString("dd/MM/yyyy") – @Model.Week.AddDays(6).ToString("dd/MM/yyyy") · Giờ Việt Nam</p>
+</div>
+<div class="actions">
+<a class="button secondary small" href="@Url.Action("Index",new{week=Model.Week.AddDays(-7).ToString("yyyy-MM-dd")})">← Tuần trước</a>
+<a class="button secondary small" href="@Url.Action("Index")">Hôm nay</a>
+<a class="button small" href="@Url.Action("Index",new{week=Model.Week.AddDays(7).ToString("yyyy-MM-dd")})">Tuần sau →</a>
+</div>
+</div>
+<div class="panel">
+<form class="filters" method="get">
+<div class="field narrow">
+<label for="week">Chọn ngày trong tuần</label>
+<input id="week" name="week" type="date" value="@Model.Week.ToString("yyyy-MM-dd")"/>
+</div>
+<button class="secondary">Xem lịch</button>
+</form>
+<div class="week">
+@for(int i=0;i<7;i++){var date=Model.Week.AddDays(i);<section class="day">
+<h3>@days[i]<br/>
+<strong>@date.ToString("dd/MM")</strong>
+</h3>
+@foreach(var s in Model.Sessions.Where(s=>s.StartsAt.Date==date)){<div class="session">@s.StartsAt.ToString("HH:mm") – @s.EndsAt.ToString("HH:mm")<strong>@s.CenterClass.Code</strong>@s.CenterClass.Course.Name<small>@s.CenterClass.Room · @s.CenterClass.Teacher.FullName</small>
+<small>@s.Topic</small>
+</div>}
+</section>}
+</div>
+@if(!Model.Sessions.Any()){<p class="empty">Tuần này chưa có lịch học. Đăng ký Pending chưa xuất hiện trong lịch học viên.</p>}
+</div>

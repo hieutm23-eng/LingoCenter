@@ -1,0 +1,22 @@
+﻿@model Course
+@{ViewBag.Title=Model.Id==0?"Tạo khóa học":"Sửa khóa học";}
+<div class="heading">
+<h1>@ViewBag.Title</h1>
+<a href="@Url.Action("Index")">← Danh sách khóa học</a>
+</div>
+<div class="panel">
+@using(Html.BeginForm()){
+@Html.AntiForgeryToken()
+@Html.ValidationSummary(false)@Html.HiddenFor(m=>m.Id)<div class="form-grid">
+<div class="field">@Html.LabelFor(m=>m.Name,"Tên khóa học")@Html.TextBoxFor(m=>m.Name)</div>
+<div class="field">@Html.LabelFor(m=>m.Level,"Trình độ")@Html.EnumDropDownListFor(m=>m.Level)</div>
+<div class="field">@Html.LabelFor(m=>m.DurationWeeks,"Thời lượng (tuần)")@Html.TextBoxFor(m=>m.DurationWeeks,new{type="number",min=1,max=104})</div>
+<div class="field">@Html.LabelFor(m=>m.TuitionFee,"Học phí (VND)")@Html.TextBoxFor(m=>m.TuitionFee,new{type="number",min=1,step=1})</div>
+<div class="field wide">@Html.LabelFor(m=>m.Description,"Giới thiệu")@Html.TextAreaFor(m=>m.Description)</div>
+<div class="field wide">@Html.LabelFor(m=>m.Syllabus,"Đề cương môn học")@Html.TextAreaFor(m=>m.Syllabus)</div>
+</div>
+<div class="field">
+<label>@Html.CheckBoxFor(m=>m.IsActive) Hiển thị khóa học để nhận đăng ký</label>
+</div>
+<button>Lưu khóa học</button>}
+</div>

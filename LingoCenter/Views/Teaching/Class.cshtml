@@ -1,0 +1,56 @@
+﻿@model CenterClass
+@{ViewBag.Title=Model.Code;}
+<div class="heading">
+<div>
+<div class="eyebrow">CLASSROOM</div>
+<h1>@Model.Code · @Model.Course.Name</h1>
+<p>@Model.Teacher.FullName · @Model.Room · @Model.Occupied học viên</p>
+</div>
+<a class="button" href="@Url.Action("Scores",new{id=Model.Id})">Nhập điểm & công bố →</a>
+</div>
+<div class="panel table-wrap">
+<h2>Các buổi học</h2>
+<table>
+<thead>
+<tr>
+<th>Ngày / giờ</th>
+<th>Nội dung</th>
+<th>
+</th>
+</tr>
+</thead>
+<tbody>
+@foreach(var s in Model.Sessions.OrderBy(s=>s.StartsAt)){<tr>
+<td>@s.StartsAt.ToString("dd/MM/yyyy")<small>@s.StartsAt.ToString("HH:mm")–@s.EndsAt.ToString("HH:mm")</small>
+</td>
+<td>@s.Topic</td>
+<td>
+<a class="button small secondary" href="@Url.Action("Attendance",new{id=s.Id})">Điểm danh</a>
+</td>
+</tr>}
+</tbody>
+</table>
+</div>
+<div class="panel">
+<h2>Danh sách học viên</h2>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Học viên</th>
+<th>Email</th>
+<th>Trạng thái</th>
+</tr>
+</thead>
+<tbody>
+@foreach(var e in Model.Enrollments){<tr>
+<td>@e.Student.FullName</td>
+<td>@e.Student.Email</td>
+<td>
+<span class="badge @e.Status">@e.Status</span>
+</td>
+</tr>}
+</tbody>
+</table>
+</div>
+</div>

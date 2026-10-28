@@ -1,0 +1,29 @@
+﻿@model List<Notification>
+@{ViewBag.Title = "Thông báo";}
+<div class="heading">
+    <div>
+        <div class="eyebrow">STAY IN THE LOOP</div>
+        <h1>Thông báo của bạn</h1>
+        <p>Lịch học trong 24 giờ tới, hạn học phí trong 3 ngày và kết quả mới.</p>
+    </div>
+</div>
+<div class="panel">
+    @foreach (var n in Model)
+    {<div class="notice">
+            <span class="badge">@(n.IsRead?"Đã đọc":"Mới")</span>
+            <p>
+                @n.Message<br />
+            <small>@n.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+        </p>
+        @if (!n.IsRead)
+        {<form method="post" action="@Url.Action("Read")">
+                @Html.AntiForgeryToken()<input type="hidden" name="id" value="@n.Id" />
+                <button class="small secondary">Đã đọc</button>
+            </form>}
+    </div>}
+    @if (!Model.Any())
+    {<div class="empty">
+            <strong>Bạn đã cập nhật tất cả</strong>Thông báo sẽ xuất hiện tại đây khi có lịch, học phí hoặc điểm mới.
+        </div>}
+</div>
+@Html.Partial("_Pager")

@@ -1,0 +1,17 @@
+﻿@model RegisterVm
+@{ViewBag.Title="Đăng ký học viên";}
+<div class="panel" style="max-width:680px;margin:auto">
+<div class="eyebrow">START YOUR JOURNEY</div>
+<h1>Tạo tài khoản học viên</h1>
+<p class="muted">Một bước nhỏ hôm nay. Một tương lai rộng mở.</p>
+@using(Html.BeginForm()){
+@Html.AntiForgeryToken()
+@Html.ValidationSummary(false)<div class="form-grid">
+<div class="field">@Html.LabelFor(m=>m.FullName,"Họ và tên")@Html.TextBoxFor(m=>m.FullName)</div>
+<div class="field">@Html.LabelFor(m=>m.Phone,"Số điện thoại")@Html.TextBoxFor(m=>m.Phone)</div>
+<div class="field wide">@Html.LabelFor(m=>m.Email)@Html.TextBoxFor(m=>m.Email,new{type="email"})</div>
+<div class="field">@Html.LabelFor(m=>m.Password,"Mật khẩu (ít nhất 10 ký tự)")@Html.PasswordFor(m=>m.Password)</div>
+<div class="field">@Html.LabelFor(m=>m.ConfirmPassword,"Nhập lại mật khẩu")@Html.PasswordFor(m=>m.ConfirmPassword)</div>
+</div>
+<button>Tạo tài khoản →</button> <a href="@Url.Action("Login")">Đã có tài khoản?</a>}
+</div>

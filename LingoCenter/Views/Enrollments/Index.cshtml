@@ -1,0 +1,80 @@
+﻿@model List<Enrollment>
+@{ViewBag.Title = "Quản lý đăng ký";}
+<div class="heading">
+    <div>
+        <div class="eyebrow">ENROLLMENT DESK</div>
+        <h1>Đăng ký học</h1>
+        <p>Pending → Confirmed → Studying → Completed; có thể rút trước khi hoàn thành.</p>
+    </div>
+</div>
+<form class="filters" method="get">
+    <div class="field">
+        <label for="q">Tìm học viên hoặc lớp</label>
+        <input id="q" name="q" value="@Request.QueryString["q"]" />
+    </div>
+    <div class="field">
+        <label for="status">Trạng thái</label>@Html.DropDownList("status", new SelectList(Enum.GetValues(typeof(EnrollmentStatus)), Request.QueryString["status"]), "Tất cả")
+    </div>
+    <button>Lọc đăng ký</button>
+</form>
+<div class="panel">
+    <details>
+        <summary>+ Đăng ký thay học viên</summary>
+        <form class="filters" method="post" action="@Url.Action("Create")">
+            @Html.AntiForgeryToken()<div class="field">
+                <label for="studentId">Học viên</label>@Html.DropDownList("studentId", (SelectList)ViewBag.Students)
+            </div>
+            <div class="field">
+                <label for="classId">Lớp</label>@Html.DropDownList("classId", (SelectList)ViewBag.Classes)
+            </div>
+            <button>Thêm đăng ký</button>
+        </form>
+    </details>
+</div>
+<div class="panel table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Học viên</th>
+                <th>Lớp</th>
+                <th>Ngày / hạn đóng phí</th>
+                <th>Trạng thái</th>
+                <th>Còn nợ</th>
+                <th>Chuyển trạng thái</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var e in Model)
+            {
+                <tr>
+                    <td>
+                        <strong>@e.Student.FullName</strong>
+                        <small>@e.Student.Email</small>
+                    </td>
+                    <td>@e.CenterClass.Code</td>
+                    <td>
+                        @e.EnrolledAt.ToString("dd/MM/yyyy")<small>Hạn: @e.DueDate.ToString("dd/MM/yyyy")</small>
+                    </td>
+                    <td>
+                        <span class="badge @e.Status">@e.Status</span>
+                    </td>
+                    <td>@e.Balance.ToString("N0") ₫</td>
+                    <td>
+                        @if (e.Status != EnrollmentStatus.Completed && e.Status != EnrollmentStatus.Withdrawn)
+                        {<form class="actions" method="post" action="@Url.Action("Status")">
+                                @Html.AntiForgeryToken()<input type="hidden" name="id" value="@e.Id" />
+                                <select name="status" style="width:auto">
+                                    <option value="@(e.Status==EnrollmentStatus.Pending?EnrollmentStatus.Confirmed:e.Status==EnrollmentStatus.Confirmed?EnrollmentStatus.Studying:EnrollmentStatus.Completed)">@(e.Status==EnrollmentStatus.Pending?EnrollmentStatus.Confirmed:e.Status==EnrollmentStatus.Confirmed?EnrollmentStatus.Studying:EnrollmentStatus.Completed)</option>
+                                    <option value="Withdrawn">Withdrawn</option>
+                                </select>
+                                <button class="small">Lưu</button>
+                            </form>}
+                    </td>
+                </tr>
+}
+        </tbody>
+    </table>
+    @if (!Model.Any())
+    {<p class="empty">Chưa có đăng ký phù hợp.</p>}
+</div>
+@Html.Partial("_Pager")

@@ -1,0 +1,104 @@
+﻿@model List<User>
+@{ViewBag.Title = "Quản lý người dùng";}
+<div class="heading">
+    <div>
+        <div class="eyebrow">PEOPLE & ROLES</div>
+        <h1>Cộng đồng LingoCenter</h1>
+        <p>Quản lý học viên, giáo viên và quản trị viên.</p>
+    </div>
+    <span class="pill">@ViewBag.TotalItems tài khoản</span>
+</div>
+<form class="filters" method="get">
+    <div class="field">
+        <label for="q">Tìm người dùng</label>
+        <input id="q" name="q" placeholder="Họ tên hoặc email" value="@Request.QueryString["q"]" />
+    </div>
+    <button>Tìm kiếm</button>
+</form>
+<div class="panel">
+    <details>
+        <summary>+ Tạo tài khoản mới</summary>
+        <form action="@Url.Action("Create")" method="post">
+            @Html.AntiForgeryToken()<div class="form-grid">
+                <div class="field">
+                    <label for="FullName">Họ tên</label>
+                    <input id="FullName" name="FullName" required maxlength="120" />
+                </div>
+                <div class="field">
+                    <label for="Email">Email</label>
+                    <input id="Email" name="Email" type="email" required />
+                </div>
+                <div class="field">
+                    <label for="Phone">Điện thoại</label>
+                    <input id="Phone" name="Phone" maxlength="30" />
+                </div>
+                <div class="field">
+                    <label for="role">Vai trò</label>@Html.DropDownList("role", new SelectList(Enum.GetValues(typeof(UserRole))))
+                </div>
+                <div class="field">
+                    <label for="Password">Mật khẩu (10+ ký tự)</label>
+                    <input id="Password" name="Password" type="password" minlength="10" required />
+                </div>
+                <div class="field">
+                    <label for="ConfirmPassword">Xác nhận mật khẩu</label>
+                    <input id="ConfirmPassword" name="ConfirmPassword" type="password" required />
+                </div>
+            </div>
+            <button>Tạo tài khoản</button>
+        </form>
+    </details>
+</div>
+<div class="panel table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Họ tên / email</th>
+                <th>Vai trò</th>
+                <th>Trạng thái</th>
+                <th>Quản lý</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var u in Model)
+            {
+                <tr>
+                    <td>
+                        <strong>@u.FullName</strong>
+                        <small>@u.Email</small>
+                    </td>
+                    <td>
+                        <span class="badge">@u.Role</span>
+                    </td>
+                    <td>@(u.IsActive?"Hoạt động":"Đã khóa")</td>
+                    <td>
+                        <details>
+                            <summary>Chỉnh sửa</summary>
+                            <form action="@Url.Action("Update")" method="post">
+                                @Html.AntiForgeryToken()<input type="hidden" name="id" value="@u.Id" />
+                                <label>
+                                    Họ tên<input name="fullName" value="@u.FullName" required />
+                                </label>
+                                <label>
+                                    Điện thoại<input name="phone" value="@u.Phone" />
+                                </label>
+                                <label>
+                                    Vai trò<select name="role">
+                                        @foreach (UserRole r in Enum.GetValues(typeof(UserRole)))
+                                        {
+                                            <option value="@r" selected="@(r==u.Role?"selected":null)">@r</option>
+}
+                                    </select>
+                                </label>
+                                <label>
+                                    <input name="active" type="checkbox" value="true" checked="@(u.IsActive?"checked":null)" /> Hoạt động
+                                </label>
+                                <button class="small">Lưu</button>
+                            </form>
+                        </details>
+                    </td>
+                </tr>
+}
+        </tbody>
+    </table>
+</div>
+@Html.Partial("_Pager")

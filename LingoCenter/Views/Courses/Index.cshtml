@@ -1,0 +1,84 @@
+﻿@model List<Course>
+@{ViewBag.Title = "Quản lý khóa học";}
+<div class="heading">
+    <div>
+        <div class="eyebrow">COURSE CATALOG</div>
+        <h1>Quản lý khóa học</h1>
+        <p>Thiết kế lộ trình học tập cho từng mục tiêu.</p>
+    </div>
+    <a class="button" href="@Url.Action("Edit")">+ Tạo khóa học</a>
+</div>
+<div class="panel table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Khóa học</th>
+                <th>Trình độ</th>
+                <th>Thời lượng</th>
+                <th>Học phí</th>
+                <th>Hiển thị</th>
+                <th>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var c in Model)
+            {
+                <tr>
+                    <td>
+                        <strong>@c.Name</strong>
+                    </td>
+                    <td>@c.Level</td>
+                    <td>@c.DurationWeeks tuần</td>
+                    <td>@c.TuitionFee.ToString("N0") ₫</td>
+                    <td>@(c.IsActive?"Đang hiển thị":"Đã ẩn")</td>
+                    <td>
+                        <div class="actions">
+                            <a class="button small secondary" href="@Url.Action("Edit",new{id=c.Id})">Sửa</a>
+                            <form method="post" action="@Url.Action("Delete")" data-confirm="Xóa khóa học chưa có lớp?">
+                                @Html.AntiForgeryToken()<input type="hidden" name="id" value="@c.Id" />
+                                <button class="small danger">Xóa</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+}
+        </tbody>
+    </table>
+</div>
+@{
+    int currentPage = ViewBag.CurrentPage;
+    int totalPages = ViewBag.TotalPages;
+    int totalItems = ViewBag.TotalItems;
+}
+
+<p class="muted">
+    Tổng số: @totalItems khóa học —
+    Trang @currentPage / @totalPages
+</p>
+
+<nav class="pagination" aria-label="Phân trang khóa học">
+
+    @if (currentPage > 1)
+    {
+        <a href="@Url.Action("Index", new { page = currentPage - 1 })">
+            ← Trước
+        </a>
+    }
+
+    @for (int i = 1; i <= totalPages; i++)
+    {
+        <a class="@(i == currentPage ? "active" : "")"
+           href="@Url.Action("Index", new { page = i })">
+            @i
+        </a>
+    }
+
+    @if (currentPage < totalPages)
+    {
+        <a href="@Url.Action("Index", new { page = currentPage + 1 })">
+            Sau →
+        </a>
+    }
+
+</nav>

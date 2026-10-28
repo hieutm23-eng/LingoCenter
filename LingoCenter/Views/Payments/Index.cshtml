@@ -1,0 +1,332 @@
+﻿@model List<Payment>
+@{
+    ViewBag.Title = "Học phí & thanh toán";
+    var es = (List<Enrollment>)ViewBag.Enrollments;
+    bool admin = User.IsInRole("Administrator");
+    var debts = es.Where(e => e.Balance > 0 && e.Status != EnrollmentStatus.Withdrawn)
+                  .OrderBy(e => e.DueDate).ThenBy(e => e.Id).ToList();
+}
+
+<div id="tuition-page">
+    <div class="heading">
+        <div>
+            <h1>Học phí & thanh toán</h1>
+            <p>Theo dõi công nợ và các khoản thanh toán.</p>
+        </div>
+        <button type="button" id="toggle-payment" aria-controls="payment-form-panel" aria-expanded="false">
+            @(admin ? "+ Ghi nhận thu tiền" : "+ Gửi thanh toán")
+        </button>
+    </div>
+
+    <div class="stats tuition-stats">
+        <div class="stat">
+            <div class="label">Đã thanh toán</div>
+            <strong>@(((decimal)ViewBag.TotalPaid).ToString("N0"))</strong>
+            <small>VND · Đã xác nhận</small>
+        </div>
+        <div class="stat">
+            <div class="label">Chờ xác nhận</div>
+            <strong>@ViewBag.PendingCount</strong>
+            <small>Giao dịch</small>
+        </div>
+        <div class="stat">
+            <div class="label">Còn phải đóng</div>
+            <strong>@es.Where(e => e.Status != EnrollmentStatus.Withdrawn).Sum(e => e.Balance).ToString("N0")</strong>
+            <small>VND · Không gồm đăng ký đã rút</small>
+        </div>
+    </div>
+
+    <section class="panel" id="payment-form-panel" hidden>
+        <div class="panel-head">
+            <h2>@(admin ? "Ghi nhận thu học phí" : "Gửi thông tin thanh toán")</h2>
+            <button type="button" class="secondary small" id="close-payment">Đóng</button>
+        </div>
+        <p class="muted">@(admin ? "Chỉ ghi nhận sau khi kiểm tra tiền thực nhận. Số tiền khả dụng còn phụ thuộc các giao dịch đang chờ." : "Nhập thông tin chuyển khoản để trung tâm kiểm tra. Đây là yêu cầu xác nhận, không tự động trừ tiền ngân hàng.")</p>
+        @if (debts.Any())
+        {
+            <form method="post" action="@Url.Action(admin ? "Record" : "Submit")" class="form-grid">
+                @Html.AntiForgeryToken()
+                <div class="field wide">
+                    <label for="enrollmentId">Học viên / lớp / còn phải đóng</label>
+                    <select id="enrollmentId" name="enrollmentId" required>
+                        <option value="">Chọn đăng ký</option>
+                        @foreach (var e in debts)
+                        {
+                            <option value="@e.Id">@e.Student.FullName · @e.CenterClass.Code · @e.Balance.ToString("N0") ₫</option>
+                        }
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="amount">Số tiền (VND)</label>
+                    <input id="amount" name="amount" type="number" min="1" step="1" required />
+                </div>
+                <div class="field">
+                    <label for="reference">Mã giao dịch / nội dung thu</label>
+                    <input id="reference" name="reference" maxlength="120" required />
+                </div>
+                <div class="wide actions">
+                    <button type="submit">@(admin ? "Ghi nhận thu" : "Gửi xác nhận")</button>
+                </div>
+            </form>
+        }
+        else
+        {
+            <p class="empty">Không có đăng ký còn công nợ.</p>
+        }
+    </section>
+
+    <div class="tuition-tabs" role="group" aria-label="Chọn danh sách học phí">
+        <button type="button" id="tab-debt" class="active" aria-pressed="true" aria-controls="section-debt">Công nợ (@debts.Count)</button>
+        <button type="button" id="tab-history" aria-pressed="false" aria-controls="section-history">Lịch sử giao dịch</button>
+    </div>
+
+    <section class="panel" id="section-debt" aria-labelledby="tab-debt">
+        <p class="muted">Chỉ hiển thị đăng ký còn phải đóng, không gồm đăng ký đã rút.</p>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Học viên / lớp</th><th>Học phí</th><th>Đã thu</th><th>Còn lại</th><th>Hạn đóng</th><th>Thao tác</th></tr>
+                </thead>
+                <tbody id="debt-rows">
+                    @foreach (var e in debts)
+                    {
+                        <tr data-debt-row>
+                            <td><strong>@e.Student.FullName</strong><small>@e.CenterClass.Code</small></td>
+                            <td>@e.AgreedFee.ToString("N0")</td>
+                            <td>@e.Paid.ToString("N0")</td>
+                            <td><strong>@e.Balance.ToString("N0") ₫</strong></td>
+                            <td>@e.DueDate.ToString("dd/MM/yyyy")</td>
+                            <td><button type="button" class="secondary small" data-collect="@e.Id">@(admin ? "Thu tiền" : "Thanh toán")</button></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (!debts.Any())
+        {
+            <p class="empty">Không có khoản học phí còn phải đóng.</p>
+        }
+        <div class="debt-footer" id="debt-pager" hidden>
+            <span class="muted" id="debt-page-label" role="status"></span>
+            <div class="actions">
+                <button type="button" class="secondary small" id="debt-prev">← Trước</button>
+                <button type="button" class="secondary small" id="debt-next">Sau →</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel" id="section-history" aria-labelledby="tab-history" hidden>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Học viên / lớp</th><th>Số tiền</th><th>Ngày tạo</th><th>Trạng thái</th><th>Tham chiếu</th><th>Thao tác</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                        <tr>
+                            <td><strong>@p.Enrollment.Student.FullName</strong><small>@p.Enrollment.CenterClass.Code</small></td>
+                            <td>@p.Amount.ToString("N0") ₫</td>
+                            <td>@p.CreatedAt.ToString("dd/MM/yyyy")</td>
+                            <td><span class="badge @p.Status">@(p.Status == PaymentStatus.Paid ? "Đã thanh toán" : p.Status == PaymentStatus.Pending ? "Chờ xác nhận" : "Đã từ chối")</span></td>
+                            <td><details><summary>Xem chi tiết</summary><small>@p.ReceiptNo</small><small>@p.Reference</small></details></td>
+                            <td>
+                                @if (p.Status == PaymentStatus.Paid)
+                                {
+                                    <a class="button secondary small" href="@Url.Action("Receipt", new { id = p.Id })">Biên lai</a>
+                                }
+                                @if (admin && p.Status == PaymentStatus.Pending)
+                                {
+                                    <form method="post" action="@Url.Action("Review")" class="actions" data-confirm="Xác nhận xử lý giao dịch đã chọn?">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@p.Id" />
+                                        <button class="small" type="submit" name="approve" value="true">Duyệt</button>
+                                        <button class="small danger" type="submit" name="approve" value="false">Từ chối</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (!Model.Any())
+        {
+            <p class="empty">Chưa có giao dịch.</p>
+        }
+        @Html.Partial("_Pager")
+    </section>
+</div>
+
+<style>
+    #tuition-page [hidden] {
+        display: none !important;
+    }
+
+    #tuition-page .tuition-stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    #tuition-page .stat {
+        padding: 17px 20px;
+    }
+
+        #tuition-page .stat strong {
+            font-size: clamp(20px, 2.2vw, 29px);
+            overflow-wrap: anywhere;
+        }
+
+    #tuition-page .tuition-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+
+        #tuition-page .tuition-tabs button {
+            background: #e9f1ef;
+            color: #254c43;
+        }
+
+            #tuition-page .tuition-tabs button.active {
+                background: #127d76;
+                color: white;
+            }
+
+    #tuition-page .debt-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-top: 18px;
+        flex-wrap: wrap;
+    }
+
+    #tuition-page button:disabled {
+        opacity: .45;
+        cursor: default;
+    }
+
+    #tuition-page button:focus-visible {
+        outline: 3px solid #86cdb7;
+        outline-offset: 3px;
+    }
+
+    #tuition-page td {
+        padding: 12px 10px;
+    }
+
+        #tuition-page td details {
+            margin: 0;
+        }
+
+            #tuition-page td details small {
+                max-width: 220px;
+                overflow-wrap: anywhere;
+            }
+
+    #tuition-page .pagination {
+        flex-wrap: wrap;
+        margin: 16px 0 0;
+    }
+
+    @@media (max-width: 760px) {
+        #tuition-page .tuition-stats {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        #tuition-page .stat strong {
+            font-size: 25px;
+        }
+
+        #tuition-page table {
+            min-width: 640px;
+        }
+    }
+</style>
+
+<script>(function () {
+    var root = document.getElementById('tuition-page');
+    var formPanel = document.getElementById('payment-form-panel');
+    var toggle = document.getElementById('toggle-payment');
+    var debtSection = document.getElementById('section-debt');
+    var historySection = document.getElementById('section-history');
+    var debtTab = document.getElementById('tab-debt');
+    var historyTab = document.getElementById('tab-history');
+
+    function setForm(open, enrollmentId) {
+        formPanel.hidden = !open;
+        toggle.setAttribute('aria-expanded', String(open));
+        if (open) {
+            var select = document.getElementById('enrollmentId');
+            if (select) {
+                if (enrollmentId) select.value = enrollmentId;
+                select.focus();
+            }
+        } else {
+            toggle.focus();
+        }
+    }
+
+    toggle.addEventListener('click', function () { setForm(formPanel.hidden); });
+    document.getElementById('close-payment').addEventListener('click', function () { setForm(false); });
+    root.querySelectorAll('[data-collect]').forEach(function (button) {
+        button.addEventListener('click', function () { setForm(true, button.getAttribute('data-collect')); });
+    });
+
+    function showTab(name, updateUrl) {
+        var historySelected = name === 'history';
+        debtSection.hidden = historySelected;
+        historySection.hidden = !historySelected;
+        debtTab.classList.toggle('active', !historySelected);
+        historyTab.classList.toggle('active', historySelected);
+        debtTab.setAttribute('aria-pressed', String(!historySelected));
+        historyTab.setAttribute('aria-pressed', String(historySelected));
+        if (updateUrl) {
+            var url = new URL(window.location.href);
+            url.hash = historySelected ? 'history' : 'debt';
+            window.history.replaceState(null, '', url.toString());
+        }
+    }
+
+    debtTab.addEventListener('click', function () { showTab('debt', true); });
+    historyTab.addEventListener('click', function () { showTab('history', true); });
+    historySection.querySelectorAll('.pagination a').forEach(function (link) {
+        var url = new URL(link.href);
+        url.hash = 'history';
+        link.href = url.toString();
+    });
+
+    // The controller already supplies all enrollments for the payment form.
+    // Paginate their display independently; transaction pagination stays server-side.
+    var debtRows = Array.from(root.querySelectorAll('[data-debt-row]'));
+    var debtPage = 1;
+    var debtSize = 5;
+    var debtPages = Math.max(1, Math.ceil(debtRows.length / debtSize));
+    function renderDebts() {
+        debtRows.forEach(function (row, index) {
+            row.hidden = index < (debtPage - 1) * debtSize || index >= debtPage * debtSize;
+        });
+        document.getElementById('debt-pager').hidden = debtRows.length === 0;
+        document.getElementById('debt-page-label').textContent =
+            'Hiển thị ' + ((debtPage - 1) * debtSize + 1) + '–' + Math.min(debtPage * debtSize, debtRows.length) +
+            ' / ' + debtRows.length + ' khoản · Trang ' + debtPage + '/' + debtPages;
+        document.getElementById('debt-prev').disabled = debtPage === 1;
+        document.getElementById('debt-next').disabled = debtPage === debtPages;
+    }
+    document.getElementById('debt-prev').addEventListener('click', function () {
+        if (debtPage > 1) { debtPage--; renderDebts(); }
+    });
+    document.getElementById('debt-next').addEventListener('click', function () {
+        if (debtPage < debtPages) { debtPage++; renderDebts(); }
+    });
+    renderDebts();
+    function restoreTab() {
+        var hash = window.location.hash;
+        var hasPage = new URLSearchParams(window.location.search).has('page');
+        showTab(hash === '#debt' ? 'debt' : hash === '#history' || hasPage ? 'history' : 'debt', false);
+    }
+    window.addEventListener('hashchange', restoreTab);
+    restoreTab();
+})();</script>

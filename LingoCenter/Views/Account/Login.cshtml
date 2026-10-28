@@ -1,0 +1,25 @@
+﻿@model LoginVm
+@{ViewBag.Title="Đăng nhập";}
+<div class="auth">
+<section class="auth-story">
+<div class="eyebrow" style="color:#afe4c9">WELCOME TO LINGOCENTER</div>
+<h1>Một nơi để học.<br/>Nhiều cách để tiến xa.</h1>
+<p>Khóa học, lịch học và kết quả của bạn — tất cả trong một không gian.</p>
+<div class="orbit" style="margin-top:25px">
+<span>Hello!</span>
+</div>
+</section>
+<section class="auth-form">
+<h1>Chào mừng trở lại</h1>
+<p class="muted">Đăng nhập để tiếp tục hành trình.</p>
+@using(Html.BeginForm()){
+@Html.AntiForgeryToken()
+@Html.ValidationSummary(false)<div class="field">@Html.LabelFor(m=>m.Email)@Html.TextBoxFor(m=>m.Email,new{type="email",autocomplete="username",required="required"})</div>
+<div class="field">
+<label for="Password">Mật khẩu</label>@Html.PasswordFor(m=>m.Password,new{autocomplete="current-password",required="required"})</div>
+<button style="width:100%">Đăng nhập →</button>}
+<div class="auth-note">Chưa có tài khoản? <a href="@Url.Action("Register")">Đăng ký học viên</a>
+<p style="margin-top:12px">Cần hỗ trợ tài khoản? Liên hệ quản trị viên trung tâm.</p>
+</div>
+</section>
+</div>

@@ -1,0 +1,21 @@
+﻿@model List<Course>
+@{ViewBag.Title="Khám phá khóa học";}
+<div class="heading">
+<div>
+<div class="eyebrow">FIND YOUR NEXT STEP</div>
+<h1>Khóa học dành cho bạn</h1>
+<p>Chọn trình độ phù hợp và bắt đầu hành trình tiếng Anh.</p>
+</div>
+<span class="pill">7 trình độ · Lộ trình cá nhân</span>
+</div>
+<form class="filters" method="get">
+<div class="field">
+<label for="q">Tìm kiếm khóa học</label>
+<input id="q" name="q" value="@ViewBag.Query" placeholder="IELTS, English, TOEIC…"/>
+</div>
+<div class="field narrow">
+<label for="level">Trình độ</label>@Html.DropDownList("level",new SelectList(Enum.GetValues(typeof(CourseLevel)),ViewBag.Level),"Tất cả trình độ")</div>
+<button>Tìm khóa học</button>
+</form>@Html.Partial("_CourseCards",Model)<nav class="pagination">
+@for(int i=1;i<=(int)ViewBag.Pages;i++){<a class="@(i==(int)ViewBag.Page?"active":"")" href="@Url.Action("Courses",new{page=i,q=ViewBag.Query,level=ViewBag.Level})">@i</a>}
+</nav>

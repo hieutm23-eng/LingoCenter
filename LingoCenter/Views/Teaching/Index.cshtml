@@ -1,0 +1,27 @@
+﻿@model List<CenterClass>
+@{ViewBag.Title = "Lớp phụ trách";}
+<div class="heading">
+    <div>
+        <div class="eyebrow">TEACHER WORKSPACE</div>
+        <h1>Truyền cảm hứng. Tạo bước tiến.</h1>
+        <p>Quản lý buổi học và đồng hành cùng từng học viên.</p>
+    </div>
+    <a class="button" href="@Url.Action("Index","Timetable")">Lịch giảng dạy →</a>
+</div>
+<div class="grid">
+    @foreach (var c in Model)
+    {<div class="course-card">
+            <div class="course-art">
+                <strong>@c.Code</strong>
+                <span>@c.Availability</span>
+            </div>
+            <div class="course-body">
+                <h2>@c.Course.Name</h2>
+                <p>@c.Occupied học viên · @c.Room<br />@c.Sessions.Count buổi trong lịch</p>
+                <a class="button secondary" href="@Url.Action("Class",new{id=c.Id})">Vào lớp học →</a>
+            </div>
+        </div>}
+</div>
+@if (!Model.Any())
+{<div class="panel empty">Bạn chưa được phân công lớp học.</div>}
+@Html.Partial("_Pager")

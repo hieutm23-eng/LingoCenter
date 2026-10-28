@@ -1,0 +1,39 @@
+﻿@model ClassSession
+@{ViewBag.Title="Điểm danh "+Model.CenterClass.Code;var existing=(List<Attendance>)ViewBag.Existing;var students=Model.CenterClass.Enrollments.Where(e=>e.Status==EnrollmentStatus.Confirmed||e.Status==EnrollmentStatus.Studying||e.Status==EnrollmentStatus.Completed).OrderBy(e=>e.Student.FullName).ToList();}
+<div class="heading">
+<div>
+<div class="eyebrow">SESSION ATTENDANCE</div>
+<h1>Điểm danh · @Model.CenterClass.Code</h1>
+<p>@Model.StartsAt.ToString("dd/MM/yyyy HH:mm") · @Model.Topic</p>
+</div>
+<a href="@Url.Action("Class",new{id=Model.CenterClassId})">← Về lớp</a>
+</div>
+<div class="panel">
+<form method="post">
+@Html.AntiForgeryToken()<input name="id" type="hidden" value="@Model.Id"/>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Học viên</th>
+<th>Trạng thái điểm danh</th>
+</tr>
+</thead>
+<tbody>
+@for(int i=0;i<students.Count;i++){var e=students[i];var old=existing.FirstOrDefault(a=>a.EnrollmentId==e.Id);<tr>
+<td>@e.Student.FullName<input type="hidden" name="rows[@i].EnrollmentId" value="@e.Id"/>
+</td>
+<td>
+<select aria-label="Điểm danh @e.Student.FullName" name="rows[@i].Status" required>
+<option value="">Chọn trạng thái</option>
+@foreach(AttendanceStatus status in Enum.GetValues(typeof(AttendanceStatus))){<option value="@status" selected="@(old!=null&&old.Status==status?"selected":null)">@status</option>}
+</select>
+</td>
+</tr>}
+</tbody>
+</table>
+</div>
+<p class="muted">Present: có mặt · Absent: vắng · Late: muộn · Excused: có phép.</p>
+@if(students.Any()){<button>Lưu điểm danh</button>}else{<p class="empty">Chưa có học viên đủ điều kiện điểm danh.</p>}
+</form>
+</div>

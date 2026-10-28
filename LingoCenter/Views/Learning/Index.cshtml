@@ -1,0 +1,50 @@
+﻿@model List<Enrollment>
+@{ViewBag.Title = "Góc học tập";}
+<section class="hero">
+    <div>
+        <div class="eyebrow">YOUR LEARNING JOURNEY</div>
+        <h1>Tiến bộ mỗi ngày.<br />Tự tin trong từng câu nói.</h1>
+        <p>Theo dõi lớp học, sắp xếp thời gian và chinh phục mục tiêu của bạn.</p>
+        <a class="button" href="@Url.Action("Index","Timetable")">Xem lịch học tuần này →</a>
+    </div>
+    <div class="orbit">
+        <span>Grow.</span>
+        <b>YOU CAN DO IT</b>
+    </div>
+</section>
+<div class="heading">
+    <h1>Khóa học của tôi</h1>
+    <a href="@Url.Action("Courses","Home")">Khám phá khóa học →</a>
+</div>
+<div class="grid">
+    @foreach (var e in Model)
+    {<article class="course-card">
+            <div class="course-art">
+                <strong>@e.CenterClass.Code</strong>
+            </div>
+            <div class="course-body">
+                <span class="badge @e.Status">@e.Status</span>
+                <h2 style="margin-top:12px">@e.CenterClass.Course.Name</h2>
+                <p>@e.CenterClass.Teacher.FullName · @e.CenterClass.Room</p>
+                <p>
+                    Hạn học phí: @e.DueDate.ToString("dd/MM/yyyy")<br />Còn lại: <strong>@e.Balance.ToString("N0") ₫</strong>
+                </p>
+                <div class="actions">
+                    <a class="button small secondary" href="@Url.Action("Index","Payments")">Học phí</a>
+                    <a href="@Url.Action("Results")">Kết quả →</a>
+                    @if (e.Status == EnrollmentStatus.Pending)
+                    {<form method="post" action="@Url.Action("Withdraw")" data-confirm="Rút đăng ký này?">
+                            @Html.AntiForgeryToken()<input type="hidden" name="id" value="@e.Id" />
+                            <button class="small danger">Rút đăng ký</button>
+                        </form>}
+                </div>
+            </div>
+        </article>}
+</div>
+@if (!Model.Any())
+{<div class="panel empty">
+        <strong>Hành trình của bạn bắt đầu ở đây</strong>
+        <p>Bạn chưa đăng ký lớp nào. Hãy tìm khóa học phù hợp với mục tiêu.</p>
+        <a class="button" href="@Url.Action("Courses","Home")">Khám phá khóa học</a>
+    </div>}
+@Html.Partial("_Pager")

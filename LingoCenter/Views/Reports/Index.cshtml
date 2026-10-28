@@ -1,0 +1,34 @@
+﻿@{ViewBag.Title="Xuất báo cáo";}
+<div class="heading">
+<div>
+<div class="eyebrow">REPORT CENTER</div>
+<h1>Dữ liệu sẵn sàng cho quyết định</h1>
+<p>Xuất Excel danh sách học viên, điểm danh và thanh toán.</p>
+</div>
+</div>
+<div class="panel">
+<form method="get" action="@Url.Action("Export")">
+<div class="form-grid">
+<div class="field">
+<label for="kind">Loại báo cáo</label>
+<select id="kind" name="kind">
+<option value="students">Danh sách học viên theo đăng ký</option>
+<option value="attendance">Chi tiết điểm danh</option>
+<option value="payments">Lịch sử thanh toán</option>
+</select>
+</div>
+<div class="field">
+<label for="classId">Lớp học</label>@Html.DropDownList("classId",(SelectList)ViewBag.Classes,"Tất cả lớp")</div>
+<div class="field">
+<label for="from">Từ ngày</label>
+<input id="from" name="from" type="date"/>
+</div>
+<div class="field">
+<label for="to">Đến ngày</label>
+<input id="to" name="to" type="date"/>
+</div>
+</div>
+<p class="muted">Bộ lọc thời gian áp dụng theo ngày đăng ký, ngày buổi học hoặc ngày tạo giao dịch. Bỏ trống để lấy toàn bộ.</p>
+<button>⇩ Tải báo cáo Excel (.xlsx)</button>
+</form>
+</div>

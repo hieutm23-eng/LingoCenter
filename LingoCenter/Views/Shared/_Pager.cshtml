@@ -1,0 +1,88 @@
+﻿@using System.Web.Routing
+
+@{
+    int pagerCurrent = ViewBag.CurrentPage;
+    int pagerPages = ViewBag.TotalPages;
+    int pagerTotal = ViewBag.TotalItems;
+
+    string actionName =
+        Convert.ToString(ViewContext.RouteData.Values["action"]);
+
+    string controllerName =
+        Convert.ToString(ViewContext.RouteData.Values["controller"]);
+
+    Func<int, string> pageLink = number =>
+    {
+        var values =
+            new RouteValueDictionary(ViewContext.RouteData.Values);
+
+        // Giữ điều kiện tìm kiếm và lọc khi chuyển trang.
+        foreach (string key in new[] { "q", "status", "level", "id" })
+        {
+            string value = Request.QueryString[key];
+
+            if (!string.IsNullOrEmpty(value))
+            {
+                values[key] = value;
+            }
+        }
+
+        values["page"] = number;
+
+        return Url.Action(actionName, controllerName, values);
+    };
+
+    int firstNumber = Math.Max(1, pagerCurrent - 2);
+    int lastNumber = Math.Min(pagerPages, pagerCurrent + 2);
+}
+
+<p class="muted">
+    Tổng số: @pagerTotal kết quả —
+    Trang @pagerCurrent / @pagerPages
+</p>
+
+<nav class="pagination" aria-label="Phân trang danh sách">
+    @if (pagerCurrent > 1)
+    {
+        <a href="@pageLink(pagerCurrent - 1)">
+            ← Trước
+        </a>
+    }
+
+    @if (firstNumber > 1)
+    {
+        <a href="@pageLink(1)">1</a>
+    }
+
+    @if (firstNumber > 2)
+    {
+        <span>…</span>
+    }
+
+    @for (int i = firstNumber; i <= lastNumber; i++)
+    {
+        <a class="@(i == pagerCurrent ? "active" : "")"
+           href="@pageLink(i)">
+            @i
+        </a>
+    }
+
+    @if (lastNumber < pagerPages - 1)
+    {
+        <span>…</span>
+    }
+
+    @if (lastNumber < pagerPages)
+    {
+        <a href="@pageLink(pagerPages)">
+            @pagerPages
+        </a>
+    }
+
+    @if (pagerCurrent < pagerPages)
+    {
+        <a href="@pageLink(pagerCurrent + 1)">
+            Sau →
+        </a>
+    }
+</nav>

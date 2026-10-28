@@ -1,0 +1,62 @@
+﻿@model Course
+@{ViewBag.Title=Model.Name;}
+<a href="@Url.Action("Courses")">← Tất cả khóa học</a>
+<section class="hero" style="margin-top:20px">
+<div>
+<div class="eyebrow">@Model.Level · @Model.DurationWeeks TUẦN</div>
+<h1>@Model.Name</h1>
+<p>@Model.Description</p>
+<span class="pill">Học phí @Model.TuitionFee.ToString("N0") ₫</span>
+</div>
+<div class="orbit">
+<span>Aa</span>
+<b>GROW WITH US</b>
+</div>
+</section>
+<div class="two">
+<div class="panel">
+<h2>Lớp học hiện có</h2>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Lớp / giáo viên</th>
+<th>Lịch / phòng</th>
+<th>Sĩ số</th>
+<th>
+</th>
+</tr>
+</thead>
+<tbody>
+@foreach(var c in Model.Classes){<tr>
+<td>
+<strong>@c.Code</strong>
+<small>@c.Teacher.FullName</small>
+<span class="badge @c.Availability">@c.Availability</span>
+</td>
+<td>@c.Room<details>
+<summary>Xem các buổi học</summary>
+@foreach(var s in c.Sessions.OrderBy(s=>s.StartsAt)){<div>@s.StartsAt.ToString("dd/MM HH:mm")–@s.EndsAt.ToString("HH:mm")</div>}
+</details>
+</td>
+<td>@c.Occupied / @c.Capacity</td>
+<td>
+@if(User.IsInRole("Student")&&c.Availability=="Open"){<form method="post" action="@Url.Action("Enroll","Learning")">
+@Html.AntiForgeryToken()<input type="hidden" name="classId" value="@c.Id"/>
+<button class="small">Đăng ký →</button>
+</form>}else if(!User.Identity.IsAuthenticated&&c.Availability=="Open"){<a href="@Url.Action("Login","Account")">Đăng nhập để đăng ký</a>}
+</td>
+</tr>}
+</tbody>
+</table>
+</div>
+@if(!Model.Classes.Any()){<p class="empty">Trung tâm đang chuẩn bị lịch khai giảng.</p>}
+</div>
+<div class="panel">
+<div class="eyebrow">WHAT YOU WILL LEARN</div>
+<h2>Nội dung chương trình</h2>
+<p class="syllabus">@Model.Syllabus</p>
+<hr/>
+<small>Điểm tổng kết = 40% giữa kỳ + 60% cuối kỳ. Đạt từ 5.0/10. Điểm chỉ hiển thị sau khi giáo viên công bố.</small>
+</div>
+</div>

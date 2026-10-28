@@ -1,0 +1,16 @@
+﻿@model ProfileVm
+@{ViewBag.Title="Hồ sơ cá nhân";}
+<div class="heading">
+<div>
+<div class="eyebrow">YOUR ACCOUNT</div>
+<h1>Hồ sơ cá nhân</h1>
+</div>
+<a class="button secondary" href="@Url.Action("Password")">Đổi mật khẩu</a>
+</div>
+<div class="panel" style="max-width:650px">
+@using(Html.BeginForm()){
+@Html.AntiForgeryToken()
+@Html.ValidationSummary(false)<div class="field">@Html.LabelFor(m=>m.FullName,"Họ và tên")@Html.TextBoxFor(m=>m.FullName)</div>
+<div class="field">@Html.LabelFor(m=>m.Phone,"Số điện thoại")@Html.TextBoxFor(m=>m.Phone)</div>
+<button>Lưu thông tin</button>}
+</div>

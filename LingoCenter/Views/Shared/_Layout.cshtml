@@ -1,0 +1,89 @@
+﻿@{var current=ViewBag.CurrentUser as LingoCenter.Models.User;var title=ViewBag.Title??"Học tiếng Anh, mở tương lai";}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>@title · LingoCenter</title>
+<link rel="stylesheet" href="@Url.Content("~/Content/site.css")"/>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+<a class="brand" href="@Url.Action("Index","Home")">
+<span class="brandmark">L</span>LingoCenter.</a>
+<div class="caption">KHÔNG GIAN CỦA BẠN</div>
+<nav>
+
+@if(User.IsInRole("Administrator")){
+<a href="@Url.Action("Index","Dashboard")">
+<span class="navicon">◈</span>Tổng quan</a>
+<a href="@Url.Action("Index","Courses")">
+<span class="navicon">▤</span>Khóa học</a>
+<a href="@Url.Action("Index","Classes")">
+<span class="navicon">▦</span>Lớp học</a>
+<a href="@Url.Action("Index","Users")">
+<span class="navicon">♧</span>Người dùng</a>
+<a href="@Url.Action("Index","Enrollments")">
+<span class="navicon">↗</span>Đăng ký học</a>
+<a href="@Url.Action("Index","Payments")">
+<span class="navicon">₫</span>Học phí & thu chi</a>
+<a href="@Url.Action("Index","Reports")">
+<span class="navicon">⇩</span>Xuất báo cáo</a>
+}else if(User.IsInRole("Teacher")){<a href="@Url.Action("Index","Teaching")">
+<span class="navicon">▦</span>Lớp phụ trách</a>}
+else if(User.IsInRole("Student")){<a href="@Url.Action("Index","Learning")">
+<span class="navicon">◈</span>Góc học tập</a>
+<a href="@Url.Action("Results","Learning")">
+<span class="navicon">↗</span>Kết quả học tập</a>
+<a href="@Url.Action("Index","Payments")">
+<span class="navicon">₫</span>Học phí của tôi</a>}
+<a href="@Url.Action("Courses","Home")">
+<span class="navicon">▤</span>Khám phá khóa học</a>
+
+@if(User.Identity.IsAuthenticated){<a href="@Url.Action("Index","Timetable")">
+<span class="navicon">▦</span>Thời khóa biểu</a>
+<a href="@Url.Action("Index","Notifications")">
+<span class="navicon">♧</span>Thông báo <span class="badge">@ViewBag.Unread</span>
+</a>
+<a href="@Url.Action("Profile","Account")">
+<span class="navicon">⚙</span>Tài khoản</a>}
+</nav>
+<div class="sidebar-foot">
+<strong>Make progress, every day.</strong>
+<div>Mỗi buổi học là một bước tiến tới phiên bản tự tin hơn của bạn.</div>
+</div>
+</aside>
+<div class="workspace">
+<header class="topbar">
+<div class="actions">
+<button class="mobile-menu" aria-label="Mở trình đơn">☰</button>
+<span class="trail">LingoCenter &nbsp; / &nbsp; @title</span>
+</div>
+
+@if(current!=null){<div class="person">
+<span class="avatar">@current.FullName.Substring(0,1)</span>
+<div class="person-name">
+<strong>@current.FullName</strong>
+<small>@current.Role</small>
+</div>
+<form method="post" action="@Url.Action("Logout","Account")">
+@Html.AntiForgeryToken()<button class="secondary small">Đăng xuất</button>
+</form>
+</div>}else{<div class="public-top">
+<a href="@Url.Action("Login","Account")">Đăng nhập</a>
+<a class="button small" href="@Url.Action("Register","Account")">Bắt đầu học →</a>
+</div>}
+</header>
+<main class="main">
+@if(TempData["Success"]!=null){<div class="alert" role="status">@TempData["Success"]</div>}
+@if(TempData["Error"]!=null){<div class="alert error" role="alert">@TempData["Error"]</div>}@RenderBody()</main>
+<footer class="footer">
+<span>© @DateTime.Now.Year LingoCenter. Learn with confidence.</span>
+<span>Giờ Việt Nam · GMT+7</span>
+</footer>
+</div>
+</div>
+<script src="@Url.Content("~/Scripts/site.js")">
+</script>@RenderSection("scripts",required:false)</body>
+</html>

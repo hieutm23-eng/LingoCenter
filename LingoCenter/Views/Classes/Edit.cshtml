@@ -1,0 +1,20 @@
+﻿@model CenterClass
+@{ViewBag.Title=Model.Id==0?"Tạo lớp học":"Sửa lớp học";}
+<div class="heading">
+<h1>@ViewBag.Title</h1>
+<a href="@Url.Action("Index")">← Danh sách lớp</a>
+</div>
+<div class="panel">
+@using(Html.BeginForm()){
+@Html.AntiForgeryToken()
+@Html.ValidationSummary(false)@Html.HiddenFor(m=>m.Id)<div class="form-grid">
+<div class="field">@Html.LabelFor(m=>m.Code,"Mã lớp")@Html.TextBoxFor(m=>m.Code)</div>
+<div class="field">@Html.LabelFor(m=>m.CourseId,"Khóa học")@Html.DropDownListFor(m=>m.CourseId,(SelectList)ViewBag.Courses)</div>
+<div class="field">@Html.LabelFor(m=>m.TeacherId,"Giáo viên")@Html.DropDownListFor(m=>m.TeacherId,(SelectList)ViewBag.Teachers)</div>
+<div class="field">@Html.LabelFor(m=>m.Room,"Phòng học")@Html.TextBoxFor(m=>m.Room)</div>
+<div class="field">@Html.LabelFor(m=>m.Capacity,"Sĩ số tối đa")@Html.TextBoxFor(m=>m.Capacity,new{type="number",min=1,max=100})</div>
+<div class="field">@Html.LabelFor(m=>m.Status,"Trạng thái đăng ký")@Html.EnumDropDownListFor(m=>m.Status)</div>
+</div>
+<p class="muted">Full được tự động xác định khi đủ sĩ số. Sau khi tạo lớp, vào Lịch học để thêm buổi học.</p>
+<button>Lưu lớp học</button>}
+</div>

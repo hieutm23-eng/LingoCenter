@@ -1,0 +1,23 @@
+﻿@model Payment
+@{ViewBag.Title="Biên lai học phí";}
+<div class="receipt panel">
+<div class="panel-head">
+<h1>LingoCenter.</h1>
+<span class="badge Paid">ĐÃ THANH TOÁN</span>
+</div>
+<div class="eyebrow">TUITION PAYMENT RECEIPT</div>
+<h2>Biên lai thu học phí</h2>
+<p>Mã biên lai: <strong>@Model.ReceiptNo</strong>
+<br/>Ngày thu: @Model.PaidAt.Value.ToString("dd/MM/yyyy HH:mm")</p>
+<hr/>
+<p>Học viên: <strong>@Model.Enrollment.Student.FullName</strong>
+<br/>Email: @Model.Enrollment.Student.Email<br/>Lớp: @Model.Enrollment.CenterClass.Code · @Model.Enrollment.CenterClass.Course.Name</p>
+<p>Nội dung / tham chiếu: @Model.Reference<br/>Người ghi nhận: @(Model.RecordedBy==null?"Trung tâm":Model.RecordedBy.FullName)</p>
+<div class="total">@Model.Amount.ToString("N0") ₫</div>
+<p class="muted">Cảm ơn bạn đã đồng hành cùng LingoCenter.</p>
+<hr/>
+<small>Biên lai học phí nội bộ của ứng dụng đồ án; không phải hóa đơn thuế.</small>
+<div class="no-print" style="margin-top:24px">
+<button data-print>In / lưu PDF</button> <a href="@Url.Action("Index")">Quay lại</a>
+</div>
+</div>

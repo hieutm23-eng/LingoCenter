@@ -1,0 +1,146 @@
+﻿@model DashboardVm
+@{ViewBag.Title="Tổng quan trung tâm";decimal revenueMax=Model.RevenueMonths.Select(x=>x.Value).DefaultIfEmpty(1).Max();decimal popularMax=Model.Popularity.Select(x=>x.Value).DefaultIfEmpty(1).Max();}
+<div class="heading">
+<div>
+<div class="eyebrow">CENTER OVERVIEW</div>
+<h1>Một ngày mới, nhiều bước tiến.</h1>
+<p>Theo dõi hoạt động và đồng hành cùng học viên của bạn.</p>
+</div>
+<a class="button" href="@Url.Action("Index","Reports")">⇩ Xuất báo cáo</a>
+</div>
+<form class="filters" method="get">
+<div class="field narrow">
+<label for="from">Từ ngày</label>
+<input id="from" type="date" name="from" value="@ViewBag.From"/>
+</div>
+<div class="field narrow">
+<label for="to">Đến ngày</label>
+<input id="to" type="date" name="to" value="@ViewBag.To"/>
+</div>
+<button class="secondary">Áp dụng kỳ thống kê</button>
+<small>Áp dụng cho doanh thu và giờ dạy.</small>
+</form>
+<div class="stats">
+<div class="stat">
+<span class="stat-icon">♧</span>
+<div class="label">Tổng học viên</div>
+<strong>@Model.Students</strong>
+<small>Hồ sơ tại trung tâm</small>
+</div>
+<div class="stat">
+<span class="stat-icon">▦</span>
+<div class="label">Lớp học</div>
+<strong>@Model.Classes</strong>
+<small>@Model.ClassList.Count(c=>c.Availability=="Open") lớp đang nhận đăng ký</small>
+</div>
+<div class="stat">
+<span class="stat-icon">↗</span>
+<div class="label">Lượt đăng ký</div>
+<strong>@Model.Enrollments</strong>
+<small>Tất cả trạng thái</small>
+</div>
+<div class="stat">
+<span class="stat-icon">₫</span>
+<div class="label">Doanh thu trong kỳ</div>
+<strong>@((Model.Revenue/1000000).ToString("0.#")) <span style="font-size:16px">triệu</span>
+</strong>
+<small>Giao dịch đã xác nhận</small>
+</div>
+</div>
+<div class="two">
+<section class="panel">
+<div class="panel-head">
+<h2>Doanh thu theo tháng</h2>
+<span class="pill">VND</span>
+</div>
+<div class="bars">
+@foreach(var m in Model.RevenueMonths){<div class="bar">
+<strong>@((m.Value/1000000).ToString("0.#"))tr</strong>
+<div class="bar-fill" style="height:@((int)(m.Value/Math.Max(1,revenueMax)*110))px">
+</div>@m.Label</div>}
+</div>
+@if(!Model.RevenueMonths.Any()){<div class="empty">Chưa có doanh thu trong kỳ.</div>}
+</section>
+<section class="panel">
+<div class="eyebrow">PAYMENT OVERVIEW</div>
+<h2>Công nợ cần theo dõi</h2>
+<div class="total">@Model.Outstanding.ToString("N0") ₫</div>
+<p class="muted">Số dư hiện tại của các đăng ký chưa rút, sau khi trừ học phí đã xác nhận.</p>
+<a class="button secondary" href="@Url.Action("Index","Payments")">Quản lý học phí →</a>
+</section>
+</div>
+<div class="panel">
+<div class="panel-head">
+<h2>Tình hình lớp học</h2>
+<a href="@Url.Action("Index","Classes")">Quản lý lớp →</a>
+</div>
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th>Lớp / khóa học</th>
+<th>Giáo viên</th>
+<th>Tỷ lệ lấp đầy</th>
+<th>Trạng thái</th>
+<th>
+</th>
+</tr>
+</thead>
+<tbody>
+@foreach(var c in Model.ClassList.Take(6)){<tr>
+<td>
+<strong>@c.Code</strong>
+<small>@c.Course.Name</small>
+</td>
+<td>@c.Teacher.FullName</td>
+<td>
+<div class="progress">
+<span style="width:@(c.Occupied*100/c.Capacity)%">
+</span>
+</div>@c.Occupied/@c.Capacity</td>
+<td>
+<span class="badge @c.Availability">@c.Availability</span>
+</td>
+<td>
+<a href="@Url.Action("Class","Teaching",new{id=c.Id})">Xem lớp →</a>
+</td>
+</tr>}
+</tbody>
+</table>
+</div>
+</div>
+<div class="two equal">
+<div class="panel">
+<h2>Khóa học được quan tâm</h2>
+<small>Số lượt đăng ký, gồm toàn bộ trạng thái</small>
+@foreach(var m in Model.Popularity){<div class="metric-row">
+<header>
+<span>@m.Label</span>
+<strong>@m.Value lượt</strong>
+</header>
+<div class="progress">
+<span style="width:@((int)(m.Value/Math.Max(1,popularMax)*100))%">
+</span>
+</div>
+</div>}
+</div>
+<div class="panel">
+<h2>Khối lượng giảng dạy</h2>
+<p class="muted">Tổng giờ theo lịch trong kỳ đã chọn.</p>
+@foreach(var m in Model.Workloads){<div class="metric-row">
+<header>
+<span>@m.Label</span>
+<strong>@m.Value.ToString("0.#") giờ</strong>
+</header>
+</div>}
+<hr/>
+<h3>Giao dịch gần đây</h3>
+@foreach(var p in Model.RecentPayments){<div class="metric-row">
+<header>
+<span>@p.Enrollment.Student.FullName</span>
+<strong>@p.Amount.ToString("N0") ₫</strong>
+</header>
+<span class="badge @p.Status">@p.Status</span>
+</div>}
+</div>
+</div>

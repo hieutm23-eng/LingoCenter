@@ -1,0 +1,133 @@
+﻿@model List<CenterClass>
+
+@{
+    ViewBag.Title = "Quản lý lớp học";
+
+    int currentPage = ViewBag.CurrentPage;
+    int totalPages = ViewBag.TotalPages;
+    int totalItems = ViewBag.TotalItems;
+}
+
+<div class="heading">
+    <div>
+        <div class="eyebrow">CLASS OPERATIONS</div>
+        <h1>Quản lý lớp học</h1>
+        <p>Phân công giáo viên, kiểm soát sĩ số và tổ chức lịch học.</p>
+    </div>
+    <a class="button" href="@Url.Action("Edit")">+ Tạo lớp</a>
+</div>
+
+<div class="panel table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Lớp</th>
+                <th>Giáo viên / phòng</th>
+                <th>Sĩ số</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Count == 0)
+            {
+                <tr>
+                    <td colspan="5" class="empty">
+                        Chưa có lớp học.
+                    </td>
+                </tr>
+            }
+
+            @foreach (var c in Model)
+            {
+                var occupied = c.Occupied;
+                var percent = c.Capacity > 0
+                    ? occupied * 100 / c.Capacity
+                    : 0;
+                var progressStyle = "width:" + percent + "%;";
+
+                <tr>
+                    <td>
+                        <strong>@c.Code</strong>
+                        <small>@c.Course.Name</small>
+                    </td>
+                    <td>
+                        @c.Teacher.FullName
+                        <small>@c.Room</small>
+                    </td>
+                    <td>
+                        @occupied / @c.Capacity
+
+                        <div class="progress">
+                            <span style="@progressStyle"></span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge @c.Availability">
+                            @c.Availability
+                        </span>
+                    </td>
+                    <td>
+                        <div class="actions">
+                            <a href="@Url.Action("Sessions", new { id = c.Id })">
+                                Lịch học
+                            </a>
+
+                            <a href="@Url.Action("Class", "Teaching", new { id = c.Id })">
+                                Điểm danh &amp; điểm
+                            </a>
+
+                            <a class="button secondary small"
+                               href="@Url.Action("Edit", new { id = c.Id })">
+                                Sửa
+                            </a>
+
+                            <form action="@Url.Action("Delete")"
+                                  method="post"
+                                  data-confirm="Xóa lớp chưa có dữ liệu?">
+                                @Html.AntiForgeryToken()
+
+                                <input type="hidden"
+                                       name="id"
+                                       value="@c.Id" />
+
+                                <button type="submit" class="small danger">
+                                    Xóa
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<p class="muted">
+    Tổng số: @totalItems lớp học —
+    Trang @currentPage / @totalPages
+</p>
+
+<nav class="pagination" aria-label="Phân trang lớp học">
+    @if (currentPage > 1)
+    {
+        <a href="@Url.Action("Index", new { page = currentPage - 1 })">
+            ← Trước
+        </a>
+    }
+
+    @for (int i = 1; i <= totalPages; i++)
+    {
+        <a class="@(i == currentPage ? "active" : "")"
+           href="@Url.Action("Index", new { page = i })">
+            @i
+        </a>
+    }
+
+    @if (currentPage < totalPages)
+    {
+        <a href="@Url.Action("Index", new { page = currentPage + 1 })">
+            Sau →
+        </a>
+    }
+</nav>

@@ -1,0 +1,56 @@
+﻿@model CenterClass
+@{ViewBag.Title="Lịch học "+Model.Code;}
+<div class="heading">
+<div>
+<div class="eyebrow">CLASS SCHEDULE</div>
+<h1>@Model.Code · Lịch học</h1>
+<p>@Model.Course.Name · @Model.Teacher.FullName · @Model.Room</p>
+</div>
+</div>
+<div class="panel">
+<h2>Thêm buổi học</h2>
+<form method="post" action="@Url.Action("AddSession")">
+@Html.AntiForgeryToken()<input type="hidden" name="classId" value="@Model.Id"/>
+<div class="form-grid">
+<div class="field">
+<label for="startsAt">Bắt đầu (giờ Việt Nam)</label>
+<input id="startsAt" name="startsAt" type="datetime-local" required/>
+</div>
+<div class="field">
+<label for="endsAt">Kết thúc</label>
+<input id="endsAt" name="endsAt" type="datetime-local" required/>
+</div>
+<div class="field wide">
+<label for="topic">Chủ đề buổi học</label>
+<input id="topic" name="topic" maxlength="200" required/>
+</div>
+</div>
+<button>+ Thêm buổi học</button>
+</form>
+</div>
+<div class="panel table-wrap">
+<table>
+<thead>
+<tr>
+<th>Ngày</th>
+<th>Thời gian</th>
+<th>Chủ đề</th>
+<th>
+</th>
+</tr>
+</thead>
+<tbody>
+@foreach(var s in Model.Sessions.OrderBy(s=>s.StartsAt)){<tr>
+<td>@s.StartsAt.ToString("dd/MM/yyyy")</td>
+<td>@s.StartsAt.ToString("HH:mm")–@s.EndsAt.ToString("HH:mm")</td>
+<td>@s.Topic</td>
+<td>
+<form method="post" action="@Url.Action("DeleteSession")" data-confirm="Xóa buổi học chưa có điểm danh?">
+@Html.AntiForgeryToken()<input type="hidden" name="id" value="@s.Id"/>
+<button class="small danger">Xóa buổi</button>
+</form>
+</td>
+</tr>}
+</tbody>
+</table>
+</div>

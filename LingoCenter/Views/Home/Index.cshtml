@@ -1,0 +1,21 @@
+﻿@model List<Course>
+@{ViewBag.Title="Chào mừng";}
+<section class="hero">
+<div>
+<div class="eyebrow">YOUR NEXT CHAPTER STARTS HERE</div>
+<h1>Tiếng Anh tốt hơn.<br/>Cơ hội rộng mở hơn.</h1>
+<p>Từ những câu giao tiếp đầu tiên đến mục tiêu IELTS, chúng mình cùng bạn tạo nên những bước tiến thực sự.</p>
+<a class="button" href="@Url.Action("Courses")">Tìm khóa học phù hợp →</a>
+</div>
+<div class="orbit">
+<span>Hello!</span>
+<b>LET'S GROW</b>
+</div>
+</section>
+<div class="heading">
+<div>
+<div class="eyebrow">LEARNING PATHWAYS</div>
+<h1>Chọn hành trình của bạn</h1>
+<p>Lộ trình rõ ràng. Lớp học tương tác. Theo dõi tiến bộ mỗi ngày.</p>
+</div>
+</div>@Html.Partial("_CourseCards",Model)
